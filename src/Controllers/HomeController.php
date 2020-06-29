@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\DTO\HelloData;
 use Psr\Http\Message\ResponseInterface;
 
 class HomeController extends BaseController
@@ -13,10 +14,10 @@ class HomeController extends BaseController
 
   public function showHelloWorld(): ResponseInterface
   {
-    $name = $this->request('name') ?: 'Undefined';
+    $helloData = HelloData::fromRequest($this->request());
 
     return $this->render('hello', [
-      'name' => $name,
+      'name' => $helloData->name,
     ]);
   }
 }

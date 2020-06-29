@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  php:
+    image: php:7-alpine
+    volumes: 
+      - .:/app
+    ports:
+      - 8000:8000
+    command: sh -c "php -S 0.0.0.0:8000 -t /app/public/"

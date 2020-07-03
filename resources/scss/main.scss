@@ -1,0 +1,34 @@
+// Variables
+
+$primary: #401f7c;
+$secondary: #f4f4f4;
+$border-radius: 0;
+$border-radius-sm: 0;
+$border-radius-lg: 0;
+
+// Utilities
+
+$utilities: () !default;
+$utilities: map-merge(
+  (
+    "input-padding": (
+      property: padding,
+      class: ip,
+      values: (
+        0: 0,
+        1: 0.3rem,
+        2: 0.5rem,
+        3: 0.7rem,
+        4: 0.9rem,
+        5: 1rem,
+      ),
+    ),
+  ),
+  $utilities
+);
+
+@import "style";
+
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
+

@@ -1,11 +1,19 @@
 <?php
 
-// Timezone
-date_default_timezone_set('America/Recife');
-
 $settings = [
   'appName' => 'App',
   'templatesPath' => __DIR__ . '/../templates',
+];
+
+$settings['database'] = [
+  'driver'    => 'mysql',
+  'host'      => 'localhost',
+  'database'  => 'database',
+  'username'  => 'username',
+  'password'  => 'password',
+  'charset'   => 'utf8',
+  'collation' => 'utf8_unicode_ci',
+  'prefix'    => '',
 ];
 
 if (

@@ -3,25 +3,44 @@
 namespace App;
 
 use League\Route\Router;
-use Psr\Container\ContainerInterface;
+use Laminas\Diactoros\Response;
+use League\Container\Container;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
+use League\Route\Http\Exception\NotFoundException;
 
 class App
 {
-  private ContainerInterface $container;
+  private Container $container;
 
-  public function __construct(ContainerInterface $container)
+  public function __construct(Container $container)
   {
     $this->container = $container;
   }
 
-  public function run(ServerRequestInterface $request): bool
+  /**
+   * @param ServerRequestInterface $request
+   * @param bool $sapiEmit
+   *
+   * @return ResponseInterface
+   */
+  public function run(ServerRequestInterface $request, bool $sapiEmit = true): ResponseInterface
   {
-    $this->container->add(ServerRequestInterface::class, $request);
+    $this->setupErrorHandler();
 
-    $response = $this->router()->dispatch($request);
-    return $this->sapiEmitter()->emit($response);
+    try {
+      $response = $this->router()->dispatch($request);
+    } catch (NotFoundException $e) {
+      $response = $this->notFoundHandler($request);
+    }
+
+    if ($sapiEmit) {
+      $this->sapiEmitter()->emit($response);
+    }
+
+    return $response;
   }
 
   public function router(): Router
@@ -32,5 +51,16 @@ class App
   private function sapiEmitter(): SapiEmitter
   {
     return $this->container->get(SapiEmitter::class);
+  }
+
+  private function notFoundHandler(RequestInterface $request): ResponseInterface
+  {
+    return $this->container->get('notFoundHandler')($request);
+  }
+
+  private function setupErrorHandler(): void
+  {
+    $whoops = $this->container->get(\Whoops\Run::class);
+    $whoops->register();
   }
 }

@@ -7,11 +7,12 @@
         "league/event": "^2.2",
         "league/plates": "^3.3",
         "league/route": "^4.5",
-        "spatie/data-transfer-object": "^2.2"
+        "spatie/data-transfer-object": "^2.2",
+        "illuminate/database": "^7.19",
+        "mnapoli/silly": "^1.7"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.5",
-        "pestphp/pest": "^0.2.2",
         "phpstan/phpstan": "^0.12.31",
         "phpunit/phpunit": "^9.0"
     },
@@ -20,10 +21,13 @@
             "App\\": "src/"
         }
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "scripts": {
         "phpstan": "./vendor/bin/phpstan analyse src tests --level 6",
-        "test": "./vendor/bin/pest"
+        "test": "./vendor/bin/phpunit --stderr --testdox --colors='always'"
     }
 }

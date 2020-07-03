@@ -3,28 +3,27 @@
 namespace App\Controllers;
 
 use League\Plates\Engine;
-use Psr\Http\Message\ServerRequestInterface;
+use League\Route\Router;
 use Psr\Http\Message\ResponseInterface;
 
 class BaseController
 {
   private Engine $engine;
 
-  private ServerRequestInterface $request;
-
   private ResponseInterface $response;
 
-  public function __construct(Engine $engine, ServerRequestInterface $request, ResponseInterface $response)
+  private Router $router;
+
+  public function __construct(Engine $engine, ResponseInterface $response, Router $router)
   {
     $this->engine = $engine;
     $this->response = $response;
-    $this->request = $request;
+    $this->router = $router;
   }
 
   /**
-   * Undocumented function
    * @param string $template
-   * @param array $data
+   * @param array<mixed> $data
    *
    * @return \Psr\Http\Message\ResponseInterface
    */
@@ -38,6 +37,11 @@ class BaseController
     return $this->response->withBody($body);
   }
 
+  /**
+   * @param array<mixed> $data
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   */
   protected function json(array $data): ResponseInterface
   {
     $content = \json_encode($data);
@@ -48,17 +52,21 @@ class BaseController
     return $this->response->withBody($body);
   }
 
-  /**
-   * @param string|null $queryParamKey
-   *
-   * @return ServerRequestInterface|false
-   */
-  protected function request(?string $queryParamKey = null)
+  protected function redirect(string $url): ResponseInterface
   {
-    if (!\is_null($queryParamKey)) {
-      return $this->request->getQueryParams()[$queryParamKey] ?? false;
+    return $this->response
+      ->withHeader('Location', (string)$url)
+      ->withStatus(301);
+  }
+
+  protected function redirectTo(string $routeName, array $routeArgs = []): ResponseInterface
+  {
+    $url = $this->router->getNamedRoute($routeName)->getPath();
+
+    foreach ($routeArgs as $arg => $value) {
+      $url = \preg_replace("/{{$arg}(:[^}]+)?}/", $value, $url, 1);
     }
 
-    return $this->request;
+    return $this->redirect($url);
   }
 }

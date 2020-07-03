@@ -1,12 +1,14 @@
 <?php
 
 use App\Controllers\HomeController;
+use App\Controllers\SessionController;
 use App\Middlewares\ViewCompose;
 
-router()->group('', function ($router) {
+$app->router()->group('', function ($router) {
 
-  $router->get('/', [HomeController::class, 'showHome'])->setName('home');
+  $router->get('/', [SessionController::class, 'showLogin'])->setName('login');
+  $router->post('/', [SessionController::class, 'login']);
 
-  $router->get('/hello-world', [HomeController::class, 'showHelloWorld'])->setName('hello-world');
+  $router->get('/home', [HomeController::class, 'showHome'])->setName('home');
 
 })->lazyMiddleware(ViewCompose::class);

@@ -2,6 +2,7 @@
 
 namespace App\Extensions;
 
+use Closure;
 use League\Plates\Engine;
 use League\Plates\Extension\ExtensionInterface;
 use League\Route\Router;
@@ -17,7 +18,7 @@ class RouteExtension implements ExtensionInterface
 
   public function register(Engine $engine): void
   {
-    $engine->registerFunction('route', [$this, 'route']);
+    $engine->registerFunction('route', Closure::fromCallable([$this, 'route']));
   }
 
   /**

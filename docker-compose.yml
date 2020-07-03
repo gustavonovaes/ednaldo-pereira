@@ -1,10 +1,30 @@
-version: '3'
+version: "3"
 
 services:
   php:
-    image: php:7-alpine
-    volumes: 
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    volumes:
       - .:/app
     ports:
       - 8000:8000
+    working_dir: /app
     command: sh -c "php -S 0.0.0.0:8000 -t /app/public/"
+  postgres:
+    image: postgres:11-alpine
+    ports:
+      - 0.0.0.0:5433:5432
+    volumes:
+      - ./var/pgdata:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: ecommerce
+      POSTGRES_PASSWORD: hardpass
+  node:
+    image: node:lts-alpine
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: sh -c "npm i --no-progress"

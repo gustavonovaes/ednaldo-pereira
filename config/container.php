@@ -1,6 +1,8 @@
 <?php
 
-use FastRoute\Route;
+use League\Plates\Engine;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 // Container with auto wiring and cache
 $container = (new \League\Container\Container)->delegate(
@@ -27,6 +29,8 @@ $container->share(League\Plates\Engine::class, function () use ($container) {
 
   $engine = new League\Plates\Engine($config['templatesPath']);
 
+  $engine->setFileExtension('tpl');
+
   $engine->addFolder('layouts', $config['templatesPath'] . "/layouts");
   $engine->addFolder('includes', $config['templatesPath'] . "/includes");
 
@@ -37,9 +41,69 @@ $container->share(League\Plates\Engine::class, function () use ($container) {
   return $engine;
 });
 
+$container->add(\Whoops\Run::class, function () {
+  $whoops = new \Whoops\Run();
+
+  if (\Whoops\Util\Misc::isAjaxRequest()) {
+    $whoops->pushHandler(new \Whoops\Handler\JsonResponseHandler);
+  } else if (\Whoops\Util\Misc::isCommandLine()) {
+    $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler);
+  }
+  else {
+    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+  }
+
+  return $whoops;
+});
+
 $container->add(App\Extensions\RouteExtension::class, function () use ($container) {
   $router = $container->get(League\Route\Router::class);
   return new App\Extensions\RouteExtension($router);
+});
+
+$container->add('notFoundHandler', function () use ($container) {
+  $engine = $container->get(Engine::class);
+  $response = $container->get(ResponseInterface::class);
+
+  return function (RequestInterface $request) use ($response, $engine) {
+    $content = $engine->render('404');
+
+    $response = $response
+      ->withStatus(404, "Not Found")
+      ->withHeader('Content-Type', 'text/html');
+
+    $response->getBody()->write($content);
+
+    return $response;
+  };
+});
+
+$container->add(Illuminate\Database\Capsule\Manager::class, function () use ($container) {
+  [
+    'driver'    => $driver,
+    'host'      => $host,
+    'database'  => $database,
+    'username'  => $username,
+    'password'  => $password,
+    'charset'   => $charset,
+    'collation' => $collation,
+    'prefix'    => $prefix,
+  ] = $container->get('config')['database'];
+
+  $capsule = new Illuminate\Database\Capsule\Manager;
+
+  $capsule->addConnection([
+    'driver'    => $driver,
+    'host'      => $host,
+    'database'  => $database,
+    'username'  => $username,
+    'password'  => $password,
+    'charset'   => $charset,
+    'collation' => $collation,
+    'prefix'    => $prefix,
+  ]);
+
+  return $capsule;
 });
 
 return $container;

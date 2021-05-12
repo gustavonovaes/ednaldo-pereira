@@ -35,7 +35,7 @@
   "dependencies": {
     "bootstrap": "^5.0.0-alpha1",
     "bootstrap-icons": "^1.0.0-alpha5",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "feather-icons": "^4.28.0",
     "popper.js": "^1.16.1"
   }
